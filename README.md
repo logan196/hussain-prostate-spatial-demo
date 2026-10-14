@@ -9,3 +9,15 @@ An interactive spatial explorer and a reproducible analysis of **GEO GSE230282**
 - `brief.md` / `brief.html` and `hussain_profile.md`: call prep.
 
 Portal styling is reused from Logan's `advocate-health-portal` (Novaflow IDE theme).
+
+## Gene atlas (index.html)
+Gene-centric atlas of all 18,939 QC-passing genes. Hash routes: `#/` is the searchable index and `#/gene/<SYMBOL>` is the gene page, e.g. `#/gene/KLK3`. Optional query parameters: `?mode=region|cl|he` and `?zoom=N`.
+Each gene page has:
+- HGNC metadata, with links to NCBI, GeneCards, HPA and Ensembl.
+- A zoomable H&E with an expression/region/cluster overlay.
+- Expression by region and by cluster.
+- NE vs AR Wilcoxon statistics.
+- The top 20 correlated genes.
+- Provenance.
+
+Build the atlas with `python build_atlas.py` (after `analysis.py`). Data lives in `atlas/`: uint8 expression shards, per-gene detail JSON, `genes.json` and `meta.json`. The earlier single-page viewer is now `explorer.html`.
