@@ -1,0 +1,27 @@
+name: CI
+on:
+  push: {branches: [main]}
+  pull_request:
+  workflow_dispatch:
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 20}
+      - run: node ci/lint.mjs
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - run: pip install playwright==1.47.0 rangehttpserver
+      - run: python -m playwright install --with-deps chromium
+      - name: Serve with HTTP Range support (needed for OME-TIFF tiles)
+        run: nohup python -m RangeHTTPServer 8765 > server.log 2>&1 &
+      - run: sleep 2 && curl -sf -r 0-99 -o /dev/null -w '%{http_code}\n' http://localhost:8765/vitessce/he.ome.tif
+      - name: Headless smoke test (fails on console errors)
+        run: python ci/smoke.py http://localhost:8765/
