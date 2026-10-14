@@ -1,11 +1,11 @@
 {
   "shape": [
     4394,
-    327
+    18944
   ],
   "chunks": [
-    1099,
-    82
+    4394,
+    40
   ],
   "dtype": "<f4",
   "fill_value": 0.0,
@@ -14,9 +14,9 @@
   "dimension_separator": ".",
   "compressor": {
     "id": "blosc",
-    "cname": "lz4",
-    "clevel": 5,
-    "shuffle": 1,
+    "cname": "zstd",
+    "clevel": 9,
+    "shuffle": 2,
     "blocksize": 0
   },
   "zarr_format": 2

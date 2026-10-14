@@ -1,9 +1,8 @@
 {
   "column-order": [
-    "Region",
-    "Leiden",
-    "AR score",
-    "NE score"
+    "Cell state (ensemble)",
+    "Program region",
+    "Leiden"
   ],
   "_index": "_index",
   "encoding-type": "dataframe",
