@@ -33,7 +33,7 @@ V = np.c_[v1, v2, v3, v4, v5]
 cnt = np.stack([(V == k).sum(1) for k in range(5)], 1); maj = cnt.argmax(1); agree = cnt.max(1) / V.shape[1]
 state = np.where(agree >= ABSTAIN, maj, -1)
 names = np.array([LAB[k] if k >= 0 else "Abstained (low confidence)" for k in state])
-a.obs["Cell state (ensemble)"] = pd.Categorical(names); a.obs["Program region"] = pd.Categorical([m["regions"][i] for i in m["region"]])
+a.obs["Cell state"] = pd.Categorical(names); a.obs["Program region"] = pd.Categorical([m["regions"][i] for i in m["region"]])
 a.obs["Leiden"] = pd.Categorical(cl)
 # hypothesis stats
 d = a.obs.dist_to_AR_um.values; nonAR = m["region"] != np.array(0) if False else np.array(m["region"]) != 0
@@ -52,7 +52,8 @@ extra = {"◆ state confidence": agree, "◆ AR score (z)": S[:, 0], "◆ NE sco
 Xf = np.c_[X, np.c_[[extra[k] for k in extra]].T].astype(np.float32); Xf = np.round(Xf, 2)
 var = list(a.var_names) + list(extra)
 b = anndata.AnnData(Xf, obs=pd.DataFrame(index=a.obs_names.astype(object)), var=pd.DataFrame(index=pd.Index(var, dtype=object)))
-for c in ["Cell state (ensemble)", "Program region", "Leiden"]: b.obs[c] = pd.Categorical(a.obs[c].astype(str))
+SHORT = {"AR adenocarcinoma": "AR adeno", "NE / t-SCNC-like": "NE / t-SCNC", "Amphicrine (AR+NE)": "Amphicrine", "Abstained (low confidence)": "Abstained"}
+for c in ["Cell state", "Program region", "Leiden"]: b.obs[c] = pd.Categorical(a.obs[c].astype(str).map(SHORT).fillna(a.obs[c].astype(str)) if c == "Cell state" else a.obs[c].astype(str))
 b.obsm["spatial"] = np.c_[m["x"], m["y"]].astype(np.float32); b.obsm["X_umap"] = a.obsm["X_umap"].astype(np.float32)
 shutil.rmtree(OUT + "/data.zarr", ignore_errors=True); b.write_zarr(OUT + "/data.zarr", chunks=(b.n_obs, 40))
 # H&E OME-TIFF (interleaved RGB)
