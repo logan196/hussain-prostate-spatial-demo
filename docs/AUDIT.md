@@ -37,3 +37,24 @@ Pass/fail key: ✗ = problem, ~ = partial, ✓ = OK.
 | 10, 11, 4 | README/CHANGELOG, CI smoke test (fails on any console error not on the zarr-probe allowlist) | #5 |
 
 Cycles 2 and 3 are appended below after each merge.
+
+## Cycle 2: after #1, #3, #4, #5 (live, commit ebd4459), 2026-10-14 ~16:30 ET
+- ✓ First-load transfer is **2.9 MB** (was 10.5) on desktop. Vitessce canvases appear at about 3.3 s on a cold load, behind the boot screen.
+- ✓ Share URL, CSV and PNG verified on the live site. The PNG is 805×882 with H&E + KLK3 and is not blank. The CSV has 4,394 rows.
+- ✓ Phone (390×844): the tissue is visible full-width and there is no horizontal scroll.
+- ✗ **First frame still underwhelms**: the tissue filled only about 50% of the spatial view. → fixed by auto-fit in #6.
+- ✗ The hypothesis chart axis title overlapped the tick labels. → fixed in #6.
+- ✗ The README was stale. → fixed in #7.
+- ~ The live smoke run hit one **transient 503** from the GitHub Pages CDN on a zarr chunk, right after a deploy. A re-run passed and `curl` returned 200 three times. This is not a code issue, but CI runs on localhost to avoid it.
+
+## Cycle 3: after #6, #7 (live, commit 1c90237), 2026-10-14 ~16:50 ET
+- ✓ `ci/smoke.py` against the **live** site: **9/9 pass**, with zero console errors and zero non-allowlisted HTTP errors.
+- ✓ Desktop: 2.9 MB, and the tissue fills the spatial view from the first frame. Atlas, showcase, brief and explorer all have zero errors and no horizontal scroll.
+
+**Remaining issues**
+- Phone first load is 7.7 MB, because the fitted zoom pulls full-resolution H&E tiles. A JPEG-compressed pyramid would cut this by about 4×.
+- The zarr `.zarray` probe 404s (5 per load) still appear in DevTools. They are inherent to Vitessce's zarr.js reader for AnnData groups and are allowlisted in CI.
+- The Vitessce Spot Sets view shows "○" swatch placeholders, and the spatial legend truncates long category names ("Abstained (low co…"). Both are Vitessce rendering behaviours.
+- PNG export does not include the Vitessce colour-bar legend, which is an HTML overlay; a caption is burned in instead.
+- The GitHub Actions workflow is staged but not active: the CLI token lacks the `workflow` scope.
+- The confidence map saturates, because 58% of spots are unanimous (1.0). A discrete 3/5–4/5–5/5 palette would read better.
