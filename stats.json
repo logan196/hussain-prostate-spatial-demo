@@ -1,0 +1,197 @@
+{
+ "dataset": "GSE230282 / GSM7211257 (EHU-W3), Visium CytAssist FFPE",
+ "spots_in_tissue": 4397,
+ "spots_after_qc": 4394,
+ "genes_after_qc": 18939,
+ "median_umi": 23338.5,
+ "median_genes": 7385.5,
+ "AR_genes_used": [
+  "AR",
+  "KLK3",
+  "KLK2",
+  "TMPRSS2",
+  "NKX3-1",
+  "FKBP5",
+  "STEAP2",
+  "PMEPA1",
+  "SLC45A3",
+  "HOXB13",
+  "FOLH1"
+ ],
+ "NE_genes_used": [
+  "CHGA",
+  "CHGB",
+  "SYP",
+  "ASCL1",
+  "INSM1",
+  "NCAM1",
+  "ENO2",
+  "SOX2",
+  "SCG2",
+  "SCG3",
+  "PCSK1",
+  "STMN2",
+  "ELAVL4",
+  "NEUROD1"
+ ],
+ "z_threshold": 1.0,
+ "program_counts": {
+  "Low/other": 2854,
+  "NE-high": 890,
+  "AR-high": 628,
+  "Dual AR+/NE+": 22
+ },
+ "program_fraction_pct": {
+  "Low/other": 64.95,
+  "NE-high": 20.25,
+  "AR-high": 14.29,
+  "Dual AR+/NE+": 0.5
+ },
+ "dual_fraction_of_all_spots_pct": 0.5,
+ "dual_fraction_of_program_high_spots_pct": 1.43,
+ "AR_NE_score_pearson_r": -0.43,
+ "NE_to_nearest_AR_um": {
+  "median": 1110.1,
+  "mean": 1151.3,
+  "p25": 817.0,
+  "p75": 1517.9,
+  "max": 2444.3,
+  "pct_within_250um": 3.7
+ },
+ "nonAR_to_nearest_AR_um_median": 416.5,
+ "AR_spots_bordering_NE": 4,
+ "AR_spots_total_pure": 628,
+ "nhood_enrichment_z": {
+  "AR-high": {
+   "AR-high": 51.5,
+   "NE-high": -30.9,
+   "Dual AR+/NE+": 6.4,
+   "Low/other": -32.7
+  },
+  "NE-high": {
+   "AR-high": -30.9,
+   "NE-high": 79.6,
+   "Dual AR+/NE+": -4.5,
+   "Low/other": -60.2
+  },
+  "Dual AR+/NE+": {
+   "AR-high": 6.4,
+   "NE-high": -4.5,
+   "Dual AR+/NE+": 54.2,
+   "Low/other": -10.8
+  },
+  "Low/other": {
+   "AR-high": -32.7,
+   "NE-high": -60.2,
+   "Dual AR+/NE+": -10.8,
+   "Low/other": 59.9
+  }
+ },
+ "NE_AR_by_distance_to_AR_um": [
+  {
+   "bin": "0-100",
+   "NE_z": -0.55,
+   "AR_z": 1.141
+  },
+  {
+   "bin": "100-250",
+   "NE_z": -0.449,
+   "AR_z": -0.204
+  },
+  {
+   "bin": "250-500",
+   "NE_z": -0.236,
+   "AR_z": -0.421
+  },
+  {
+   "bin": "500-1000",
+   "NE_z": 0.273,
+   "AR_z": -0.549
+  },
+  {
+   "bin": "1000-2000",
+   "NE_z": 1.194,
+   "AR_z": -0.715
+  },
+  {
+   "bin": ">2000",
+   "NE_z": 1.136,
+   "AR_z": -0.681
+  }
+ ],
+ "leiden_clusters": [
+  {
+   "leiden": "0",
+   "AR_z": 1.69,
+   "NE_z": -0.51,
+   "n": 602
+  },
+  {
+   "leiden": "1",
+   "AR_z": -0.11,
+   "NE_z": -0.6,
+   "n": 510
+  },
+  {
+   "leiden": "2",
+   "AR_z": -0.19,
+   "NE_z": -0.39,
+   "n": 450
+  },
+  {
+   "leiden": "3",
+   "AR_z": -0.85,
+   "NE_z": 1.92,
+   "n": 550
+  },
+  {
+   "leiden": "4",
+   "AR_z": 0.89,
+   "NE_z": -0.62,
+   "n": 368
+  },
+  {
+   "leiden": "5",
+   "AR_z": -0.74,
+   "NE_z": 1.35,
+   "n": 435
+  },
+  {
+   "leiden": "6",
+   "AR_z": -0.48,
+   "NE_z": -0.17,
+   "n": 389
+  },
+  {
+   "leiden": "7",
+   "AR_z": -0.4,
+   "NE_z": -0.55,
+   "n": 208
+  },
+  {
+   "leiden": "8",
+   "AR_z": -0.6,
+   "NE_z": -0.23,
+   "n": 67
+  },
+  {
+   "leiden": "9",
+   "AR_z": 0.25,
+   "NE_z": -0.57,
+   "n": 250
+  },
+  {
+   "leiden": "10",
+   "AR_z": -0.2,
+   "NE_z": -0.32,
+   "n": 197
+  },
+  {
+   "leiden": "11",
+   "AR_z": -0.35,
+   "NE_z": -0.61,
+   "n": 368
+  }
+ ],
+ "um_per_fullres_px": 0.6019048895134134
+}
