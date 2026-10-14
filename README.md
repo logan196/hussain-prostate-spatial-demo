@@ -1,43 +1,59 @@
-# Hussain prostate spatial demo: AR → NE lineage in space
+# Prostate Spatial Atlas: AR → NE lineage in space
 
-An interactive spatial explorer and a reproducible analysis of **GEO GSE230282**: Visium CytAssist FFPE prostate with co-existing de novo NEPC and ARPC (Watanabe et al., *IJMS* 2023). Prepared for a call with Dr. Maha Hussain (Northwestern) about treatment-emergent small-cell NE prostate cancer.
+**Live:** https://logan196.github.io/hussain-prostate-spatial-demo/
 
-- `index.html` + `data/`: static portal (Plotly; runs on GitHub Pages, no server). Pan/zoom the H&E, toggle program, score and cluster overlays, pick any of 337 genes, and box/lasso-select spots for summary stats.
-- `analysis.py`: re-runs everything; downloads the data from GEO if it is missing. `pip install scanpy squidpy scikit-misc leidenalg igraph`, then `python analysis.py [--z 1.0]`.
-- `stats.json`: every number quoted in the brief.
-- `figures/`: static PNGs.
-- `brief.md` / `brief.html` and `hussain_profile.md`: call prep.
+This is an interactive spatial-transcriptomics portal for **GEO GSE230282 / GSM7211257**: one Visium CytAssist FFPE prostate sample in which de novo neuroendocrine prostate cancer (NEPC) sits alongside AR-driven adenocarcinoma (Watanabe et al., *IJMS* 2023). It was built as call prep for Dr. Maha Hussain (Northwestern) on treatment-emergent small-cell NE prostate cancer (t-SCNC).
 
-Portal styling is reused from Logan's `advocate-health-portal` (Novaflow IDE theme).
+![Vitessce core: presets, confidence map and a live NL query](docs/media/vitessce_tour.gif)
 
-## Gene atlas (atlas.html)
-Gene-centric atlas of all 18,939 QC-passing genes. Hash routes: `#/` is the searchable index and `#/gene/<SYMBOL>` is the gene page, e.g. `#/gene/KLK3`. Optional query parameters: `?mode=region|cl|he` and `?zoom=N`.
-Each gene page has:
-- HGNC metadata, with links to NCBI, GeneCards, HPA and Ensembl.
-- A zoomable H&E with an expression/region/cluster overlay.
-- Expression by region and by cluster.
-- NE vs AR Wilcoxon statistics.
-- The top 20 correlated genes.
-- Provenance.
+## What's in it
+| Page | What it is |
+|---|---|
+| `index.html` | **Vitessce 3.5 core.** H&E (pyramidal OME-TIFF) + UMAP + spot sets + all 18,939 genes, lazily loaded per 40-gene zarr chunk. It has 5 presets (Overview, AR vs NE, Boundary niche, Gene query, Confidence) and a natural-language ask box. The right panel holds LIVE answers and PRECOMPUTED insights, the hypothesis panel and the ensemble cell-state calls. |
+| `atlas.html` | Gene atlas, one page per gene (`#/gene/KLK3`): HGNC metadata, a zoomable overlay, expression by region and cluster, NE-vs-AR Wilcoxon stats, top correlates and provenance. |
+| `showcase.html` | deck.gl 3D and animations: AR/NE glow map, extruded landscape, AR→NE sweep, spatial↔UMAP morph. |
+| `brief.html`, `Novaflow_Hussain_Plan.pdf` | Call brief and the 4-page plan with references. |
+| `explorer.html` | The earlier Plotly viewer (337 genes), kept for comparison. |
 
-Build the atlas with `python build_atlas.py` (after `analysis.py`). Data lives in `atlas/`: uint8 expression shards, per-gene detail JSON, `genes.json` and `meta.json`. The earlier single-page viewer is now `explorer.html`.
+![3D landscape (showcase.html)](docs/media/anim_landscape_grow.gif)
 
-## 3D & animations (showcase.html)
-- **showcase.html** (deck.gl 9, WebGL2). Four scenes:
-  - A dual-channel AR (blue) / NE (magenta) glow map, blended additively so co-expression shows as violet.
-  - A 3D extruded AR/NE landscape that grows in on load.
-  - An animated AR→NE sweep with a live NE/AR-vs-distance chart.
-  - A spatial↔UMAP morph.
+### Using the core viewer
+- **Ask**: e.g. `compare KLK3 in AR vs NE`, `NE spots within 300 µm of AR`, `where is chromogranin high` (aliases and fuzzy symbols work), or `genes correlated with SYP`. The parser runs in your browser and is rule-based: no LLM and no server. Each answer is computed from per-spot data and shown with the intent it parsed.
+- **Share**: the URL always encodes the view (`?preset=conf`, `?q=compare%20KLK3%20in%20AR%20vs%20NE`, `?preset=gene&gene=SYP`). The 🔗 button copies it.
+- **Export**:
+  - CSV of every spot: ensemble call, voter agreement, distance to AR, region, the current gene and the query group, with a provenance header.
+  - PNG of the spatial view.
+- **Keys**: `1`–`5` switch presets, `/` focuses the ask box, `S` copies the link, `E` exports CSV, `P` exports PNG, `?` shows help. The tour is under **Tour** (or `?tour=1`).
 
-  It also has camera fly-to presets, a ▶ Tour fly-through, and animated stat counters and insight cards. URL parameters: `?scene=glow|land|sweep|umap&view=overview|tilt|ne|ar|edge&tour=1`.
-- **vitessce.html** (Vitessce 3.5.1 from CDN). Linked views: spatial (H&E OME-TIFF + spots), UMAP, gene list, region/Leiden sets, layer controller and expression histogram. Data is `vitessce/data.zarr` (327 genes, AnnData zarr v2) plus `vitessce/he.ome.tif`. It needs HTTP Range support, which GitHub Pages provides.
+## Honesty rules
+- **LIVE** = computed in the browser for your query. **PRECOMPUTED** = taken from `stats.json` and the ensemble produced by `analysis.py`.
+- **Abstention gating**: 5 voters (thresholds, relaxed thresholds, spatial smoothing, GMM, cluster profile) each call every spot. A label is kept only if ≥4/5 agree; otherwise the spot is **Abstained**. That happens for 889 spots (20.23%). The **Confidence** preset maps per-spot agreement.
+- **Limits**: this is one patient with de novo NEPC and no treatment history. The treatment-sequence → t-SCNC hypothesis is shown as **not testable** with these data. All statistics are spot-level and descriptive.
 
-## Core app: Vitessce (index.html)
-A full-screen Vitessce 3.5.1 app. Slim top bar with four presets: Overview / AR vs NE / Boundary niche / Gene query.
-- **Data:** `vitessce/data.zarr` holds all 18,939 genes plus 5 derived ◆ features, as AnnData zarr v2 in 40-gene chunks with blosc-zstd compression (136 MB).
-- **H&E:** `vitessce/he.ome.tif` (planar CYX) is displayed in true color via `photometricInterpretation: {init_A_image_0: "RGB"}`.
-- **Ask box (LIVE):** parsed client-side into intent, gene (exact, HGNC alias, or Levenshtein fuzzy match), region and distance. The parse is applied as Vitessce coordination changes: feature selection, color encoding, and new spot sets (additionalObsSets). Answers are computed in the browser from `atlas/expr` shards and `vitessce/spots.json`.
-- **Ensemble cell-state calls (PRECOMPUTED, build_vitessce.py):** 5 voters (z>1 thresholds, relaxed z>0.75, spatially smoothed, 8-component GMM, Leiden-cluster profile) vote on AR / NE / Amphicrine / Stroma / Other. A spot abstains unless at least 4 of 5 voters agree.
-- **Insight cards (PRECOMPUTED):** generated per preset from `stats.json` and the ensemble output.
-- **Hussain hypothesis panel (PRECOMPUTED):** distance gradient, Spearman correlation, and transition-niche numbers.
-- Deep links: `?preset=overview|arne|niche|gene` and `?q=<question>`.
+## Reproduce
+```bash
+pip install scanpy squidpy scikit-misc leidenalg igraph anndata zarr tifffile
+python analysis.py          # downloads GSE230282 from GEO if missing → stats.json, figures/
+python build_atlas.py       # atlas/ shards
+python build_vitessce.py    # vitessce/data.zarr, pyramidal he.ome.tif, spots.json
+python -m RangeHTTPServer 8765   # the OME-TIFF needs HTTP Range support
+```
+
+## Quality checks
+- `node ci/lint.mjs`: syntax-checks every inline script and runs htmlhint.
+- `python ci/smoke.py http://localhost:8765/`: drives headless Chromium through 9 page states and **fails on any console error or HTTP ≥400**. The only allowlisted errors are zarr.js `.zarray` group probes.
+- The GitHub Actions workflow is in `ci/github-workflow-ci.yml`. To enable it, move it to `.github/workflows/ci.yml` (pushing workflow files requires a token with the `workflow` scope).
+- The audit log is in [`docs/AUDIT.md`](docs/AUDIT.md), and changes are in [`CHANGELOG.md`](CHANGELOG.md).
+
+## Provenance & citation
+- **Data**: GEO [GSE230282](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE230282), sample GSM7211257 (10x Visium CytAssist, FFPE).
+- **Primary paper**: Watanabe R, et al. *Spatial gene expression analysis reveals characteristic gene expression patterns of de novo neuroendocrine prostate cancer coexisting with androgen receptor pathway prostate cancer.* **Int J Mol Sci** 2023;24(10):8955. doi:[10.3390/ijms24108955](https://doi.org/10.3390/ijms24108955), PMID [37240308](https://pubmed.ncbi.nlm.nih.gov/37240308/).
+- **Software**:
+  - Vitessce (Keller et al., *Nat Methods* 2025) and deck.gl.
+  - scanpy (Wolf et al., *Genome Biol* 2018) and squidpy (Palla et al., *Nat Methods* 2022).
+  - Gene metadata from HGNC.
+- **Derived values**: everything shown is computed from the public data by the scripts in this repo. Nothing is simulated.
+
+Please cite the primary paper and GEO accession if you reuse the data. Cite this repo as: Beharry L. *Prostate Spatial Atlas (GSE230282 demo)*, v1.0, 2026. https://github.com/logan196/hussain-prostate-spatial-demo
+
+Portal styling is adapted from Logan's `advocate-health-portal` (Novaflow theme).
