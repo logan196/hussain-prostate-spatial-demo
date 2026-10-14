@@ -63,7 +63,7 @@ cyx = im.transpose(2, 0, 1); levels = [cyx]
 while max(levels[-1].shape[1:]) > 512:
     h, w = levels[-1].shape[1:]; levels.append(np.stack([np.array(_I.fromarray(c).resize((w // 2, h // 2), _I.LANCZOS)) for c in levels[-1]]))
 with tifffile.TiffWriter(OUT + "/he.ome.tif", ome=True, bigtiff=False) as tw:
-    opts = dict(photometric="minisblack", tile=(256, 256), compression="zlib", compressionargs={"level": 9})
+    opts = dict(photometric="minisblack", tile=(256, 256), compression="jpeg", compressionargs={"level": 75})
     tw.write(levels[0], subifds=len(levels) - 1, metadata={"axes": "CYX", "Channel": {"Name": ["R", "G", "B"]}}, **opts)
     for lv in levels[1:]: tw.write(lv, subfiletype=1, **opts)
 # client-side per-spot data for live queries
