@@ -116,10 +116,10 @@ const REGCOL=[[79,140,255],[125,170,255],[168,85,247],[100,116,139],[244,114,182
 function setColors(){const c=[];for(const [k,v] of Object.entries(STATECOL))c.push({path:CS(k),color:v});MT.regions.forEach((g,i)=>c.push({path:[SETS[1],g],color:REGCOL[i]}));return c}
 const LAYOUTS={
  overview:[["spatialBeta",0,0,8,12],["scatterplot",8,0,4,6],["obsSets",8,6,4,6]],
- arne:[["spatialBeta",0,0,8,12],["scatterplot",8,0,4,5],["featureList",8,5,4,4],["featureValueHistogram",8,9,4,3]],
+ arne:[["spatialBeta",0,0,8,12],["scatterplot",8,0,4,5],["featureList",8,5,4,7]],
  niche:[["spatialBeta",0,0,8,12],["obsSets",8,0,4,6],["scatterplot",8,6,4,6]],
- conf:[["spatialBeta",0,0,8,12],["obsSets",8,0,4,5],["featureValueHistogram",8,5,4,4],["scatterplot",8,9,4,3]],
- gene:[["spatialBeta",0,0,7,12],["scatterplot",7,0,5,5],["featureList",7,5,2,7],["featureValueHistogram",9,5,3,4],["layerControllerBeta",9,9,3,3]]};
+ conf:[["spatialBeta",0,0,8,12],["obsSets",8,0,4,4],["obsSetSizes",8,4,4,4],["scatterplot",8,8,4,4]],
+ gene:[["spatialBeta",0,0,7,12],["scatterplot",7,0,5,5],["featureList",7,5,2,7],["layerControllerBeta",9,5,3,7]]};
 const VIEW={overview:{z:-1.75,x:1000,y:750},arne:{z:-1.75,x:1000,y:750},niche:{z:-0.35,x:1560,y:960},gene:{z:-1.75,x:1000,y:750},conf:{z:-1.75,x:1000,y:750}};
 let state={preset:"overview",gene:"◆ NE score (z)",enc:"cellSetSelection",sel:[CS("AR adenocarcinoma"),CS("NE / t-SCNC-like"),CS("Amphicrine (AR+NE)"),CS("Stroma"),CS("Abstained (low confidence)")],extra:null,view:VIEW.overview,uid:0};
 function config(){const s=state,L=innerWidth<700?[["spatialBeta",0,0,12,12]]:LAYOUTS[s.preset],sc={featureSelection:"A",obsColorEncoding:"A",obsSetSelection:"A",obsSetColor:"A",additionalObsSets:"A",obsType:"A"};
@@ -135,7 +135,7 @@ function config(){const s=state,L=innerWidth<700?[["spatialBeta",0,0,12,12]]:LAY
 const root=createRoot($("#vit"));
 function render(){state.uid++;root.render(React.createElement(Vitessce,{key:state.uid,config:config(),theme:"dark",height:$("#vit").clientHeight}))}
 /* ---------------- side panel ---------------- */
-const pct=(a,b)=>(100*a/b).toFixed(1)+"%";const OPEN={ask:true,ins:true,hyp:true,ens:false};
+const pct=(a,b)=>(100*a/b).toFixed(1)+"%";const OPEN={ask:true,dst:true,ins:true,hyp:true,ens:false};
 const sec=(id,title,tag,body)=>`<details class="sec" data-id="${id}" ${OPEN[id]?"open":""}><summary><span class="chev">▶</span>${title}<span class="tag ${tag=="LIVE"?"live":""}">${tag}</span></summary><div class="sb">${body}</div></details>`;
 const EXQ=["show NE cells near AR tumor","where is SYP high","compare KLK3 in AR vs NE","show amphicrine spots"];
 const EMPTY=`<div class="empty"><div class="ic">✦</div><div>Ask a question in the top bar.<br>Parsed in your browser and applied to the views.</div><div class="chips">${EXQ.map(e=>`<button>${e}</button>`).join("")}</div></div>`;let askBody=EMPTY,askQ="";
@@ -166,8 +166,17 @@ function ens(){const c=ENS.counts,tot=Object.values(c).reduce((a,b)=>a+b,0),ord=
  <div class="leg2">${ord.map(k=>`<i style="background:rgb(${STATECOL[k]})"></i><span>${k.replace(" (low confidence)","")}</span><span class="n">${c[k]||0}</span><span class="p">${(100*(c[k]||0)/tot).toFixed(1)}%</span>`).join("")}</div>
  <div class="foot">5 voters (thresholds, relaxed thresholds, spatial smoothing, GMM, cluster profile). A label is accepted only if ≥4/5 agree. See the Spot Sets view.</div>`}
 const PN={overview:"Overview",arne:"AR vs NE",niche:"Boundary niche",gene:"Gene query",conf:"Confidence"};
-function side(){$("#side").innerHTML=sec("ask",askQ?"Answer":"Ask the data","LIVE",askBody)+sec("ins","Insights · "+PN[state.preset],"PRECOMPUTED",insights(state.preset))+sec("hyp","Hussain hypothesis","PRECOMPUTED",hyp())+sec("ens","Cell-state calls","PRECOMPUTED",ens());
+/* LIVE distribution of the coloured feature: replaces Vitessce's histogram view, which downloads the whole 18,944-column matrix */
+async function distFill(g){const el=$("#dstb");if(!el)return;const v=await featureValues(g);if(!el.isConnected)return;if(!v){el.innerHTML="Not available client-side for this feature.";return}
+ let lo=Infinity,hi=-Infinity,nz=0;for(const t of v){lo=Math.min(lo,t);hi=Math.max(hi,t);if(t>0)nz++}const nb=30,h=new Array(nb).fill(0),w=(hi-lo)||1;for(const t of v)h[Math.min(nb-1,Math.floor((t-lo)/w*nb))]++;
+ const srt=Float32Array.from(v).sort(),med=srt[srt.length>>1],mx=Math.max(...h),W=330,H=86,B=16,bw=(W-10)/nb,ly=c=>c?Math.log10(c+1)/Math.log10(mx+1):0;
+ el.innerHTML=`<svg width="100%" viewBox="0 0 ${W} ${H+B}" style="display:block">${h.map((c,i)=>`<rect x="${5+i*bw}" y="${H-ly(c)*(H-6)}" width="${bw-1}" height="${ly(c)*(H-6)}" fill="#38bdf8"><title>${(lo+i*w/nb).toFixed(2)}–${(lo+(i+1)*w/nb).toFixed(2)}: ${c} spots</title></rect>`).join("")}
+ <line x1="5" x2="${W-5}" y1="${H}" y2="${H}" stroke="#444"/><text x="5" y="${H+12}">${lo.toFixed(2)}</text><text x="${W-5}" y="${H+12}" text-anchor="end">${hi.toFixed(2)}</text><text x="${W/2}" y="${H+12}" text-anchor="middle">spots per bin (log scale)</text></svg>
+ <div class="tiles" style="margin-top:6px"><div class="tile"><div class="v">${(100*nz/v.length).toFixed(1)}%</div><div class="l">spots &gt; 0</div></div><div class="tile"><div class="v">${(+med).toFixed(2)}</div><div class="l">median · max ${hi.toFixed(2)}</div></div></div>`}
+function side(){const showD=state.enc=="geneSelection"||state.preset=="conf";
+ $("#side").innerHTML=sec("ask",askQ?"Answer":"Ask the data","LIVE",askBody)+(showD?sec("dst","Distribution · "+state.gene,"LIVE",'<div id="dstb" class="foot">computing…</div>'):"")+sec("ins","Insights · "+PN[state.preset],"PRECOMPUTED",insights(state.preset))+sec("hyp","Hussain hypothesis","PRECOMPUTED",hyp())+sec("ens","Cell-state calls","PRECOMPUTED",ens());
  document.querySelectorAll(".sec").forEach(d=>d.ontoggle=()=>OPEN[d.dataset.id]=d.open);
+ if(showD)distFill(state.gene);
  document.querySelectorAll(".chips button").forEach(b=>b.onclick=()=>{$("#q").value=b.textContent;ask(b.textContent)})}
 /* ---------------- presets ---------------- */
 /* fit the spot footprint to the spatial view so the first frame is the tissue, not black margin */
