@@ -117,7 +117,7 @@ const VIEW={overview:{z:-1.75,x:1000,y:750},arne:{z:-1.75,x:1000,y:750},niche:{z
 let state={preset:"overview",gene:"◆ NE score (z)",enc:"cellSetSelection",sel:[[SETS[0],"AR adenocarcinoma"],[SETS[0],"NE / t-SCNC-like"],[SETS[0],"Amphicrine (AR+NE)"],[SETS[0],"Stroma"],[SETS[0],"Abstained (low confidence)"]],extra:null,view:VIEW.overview,uid:0};
 function config(){const s=state,L=innerWidth<700?[["spatialBeta",0,0,12,12]]:LAYOUTS[s.preset],sc={featureSelection:"A",obsColorEncoding:"A",obsSetSelection:"A",obsSetColor:"A",additionalObsSets:"A",obsType:"A"};
  const cs={obsType:{A:"spot"},featureSelection:{A:[s.gene]},obsColorEncoding:{A:s.enc},obsSetSelection:{A:s.sel},obsSetColor:{A:setColors().concat(s.extraColors||[])},additionalObsSets:{A:s.extra||null},
-  embeddingType:{A:"UMAP"},spatialZoom:{A:innerWidth<700?Math.min(s.view.z,-2.3):s.view.z},spatialTargetX:{A:s.view.x},spatialTargetY:{A:s.view.y},spatialSpotRadius:{A:5.6},photometricInterpretation:{init_A_image_0:"RGB"}};
+  embeddingType:{A:"UMAP"},spatialZoom:{A:s.view.z},spatialTargetX:{A:s.view.x},spatialTargetY:{A:s.view.y},spatialSpotRadius:{A:5.6},photometricInterpretation:{init_A_image_0:"RGB"}};
  return {version:"1.0.16",name:"GSE230282",uid:"cfg"+s.uid,initStrategy:"auto",coordinationSpace:cs,
   datasets:[{uid:"A",name:"GSE230282",files:[{fileType:"image.ome-tiff",url:base+"vitessce/he.ome.tif"},
    {fileType:"anndata.zarr",url:base+"vitessce/data.zarr",coordinationValues:{obsType:"spot",featureType:"gene",featureValueType:"expression"},
@@ -139,14 +139,14 @@ function insights(p){const S=ST,c=ENS.counts,ne=S.NE_to_nearest_AR_um;
   conf:[[ENS.abstention_rate_pct+"%","abstained (<4/5 agree)"],[ENS.unanimous_pct+"%","unanimous (5/5)"],[(SP.conf.reduce((a,b)=>a+b,0)/N).toFixed(2),"mean voter agreement"],[SP.conf.filter(c=>c<=0.6).length.toLocaleString(),"spots ≤3/5 agree"]],
   gene:[[MT.G.toLocaleString(),"genes queryable"],["5","◆ derived features"],["0.58","ρ distance vs NE"],["18,944","matrix columns"]]}[p];
  return `<div class="tiles">${T.map(([v,l])=>`<div class="tile"><div class="v">${v}</div><div class="l">${l}</div></div>`).join("")}</div><div class="foot">From stats.json and the ensemble calls.</div>`}
-function hyp(){const G=ST.NE_AR_by_distance_to_AR_um,W=330,H=120,L=30,R=8,T=10,B=24,xs=G.map((_,i)=>L+i*(W-L-R)/(G.length-1)),y0=-1,y1=1.5,y=z=>T+(y1-z)/(y1-y0)*(H-T-B);
+function hyp(){const G=ST.NE_AR_by_distance_to_AR_um,W=330,H=132,L=30,R=8,T=10,B=34,xs=G.map((_,i)=>L+i*(W-L-R)/(G.length-1)),y0=-1,y1=1.5,y=z=>T+(y1-z)/(y1-y0)*(H-T-B);
  const path=k=>G.map((g,i)=>`${i?"L":"M"}${xs[i].toFixed(1)},${y(g[k]).toFixed(1)}`).join("");
  const grid=[-1,0,1].map(v=>`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="${v==0?"#555":"#333"}" stroke-width="1"/><text x="${L-6}" y="${y(v)+3}" text-anchor="end">${v}</text>`).join("");
  const lbl=["0.1","0.25","0.5","1","2",">2"];
  return `<svg width="100%" viewBox="0 0 ${W} ${H}" style="display:block">${grid}
  <path d="${path("AR_z")}" stroke="#4f8cff" stroke-width="2" fill="none"/><path d="${path("NE_z")}" stroke="#ec4899" stroke-width="2" fill="none"/>
- ${G.map((g,i)=>`<circle cx="${xs[i]}" cy="${y(g.AR_z)}" r="2.6" fill="#4f8cff"/><circle cx="${xs[i]}" cy="${y(g.NE_z)}" r="2.6" fill="#ec4899"/><text x="${xs[i]}" y="${H-10}" text-anchor="middle">${lbl[i]}</text>`).join("")}
- <text x="${(L+W)/2}" y="${H-0}" text-anchor="middle">distance to nearest AR spot (mm)</text>
+ ${G.map((g,i)=>`<circle cx="${xs[i]}" cy="${y(g.AR_z)}" r="2.6" fill="#4f8cff"/><circle cx="${xs[i]}" cy="${y(g.NE_z)}" r="2.6" fill="#ec4899"/><text x="${xs[i]}" y="${H-20}" text-anchor="middle">${lbl[i]}</text>`).join("")}
+ <text x="${(L+W)/2}" y="${H-3}" text-anchor="middle">distance to nearest AR spot (mm)</text>
  <rect x="${W-96}" y="4" width="8" height="8" fill="#ec4899"/><text x="${W-84}" y="11">NE z</text><rect x="${W-52}" y="4" width="8" height="8" fill="#4f8cff"/><text x="${W-40}" y="11">AR z</text></svg>
  <div class="vr"><span class="s" style="color:#34d399">✓</span><div>NE rises with distance from AR<small>Spearman ρ = ${HYP.spearman_dist_vs_NEz_nonAR[0]} · n = ${HYP.n_nonAR.toLocaleString()}</small></div></div>
  <div class="vr"><span class="s" style="color:#34d399">✓</span><div>Discrete NE territories<small>median ${(ST.NE_to_nearest_AR_um.median/1000).toFixed(2)} mm from AR · ${HYP.NE_state_within_500um_of_AR}/${HYP.NE_state_total} within 500 µm</small></div></div>
@@ -163,7 +163,13 @@ function side(){$("#side").innerHTML=sec("ask",askQ?"Answer":"Ask the data","LIV
  document.querySelectorAll(".sec").forEach(d=>d.ontoggle=()=>OPEN[d.dataset.id]=d.open);
  document.querySelectorAll(".chips button").forEach(b=>b.onclick=()=>{$("#q").value=b.textContent;ask(b.textContent)})}
 /* ---------------- presets ---------------- */
-function preset(p,keep){state.preset=p;state.view=VIEW[p];document.querySelectorAll("#presets button").forEach(b=>{b.classList.toggle("on",b.dataset.p==p);b.setAttribute("aria-pressed",b.dataset.p==p)});
+/* fit the spot footprint to the spatial view so the first frame is the tissue, not black margin */
+/* measured: Vitessce spatialBeta draws this OME-TIFF at ~2^(z+0.8) css px per image px, so offset the analytic fit */
+const ZK=innerWidth<700?0.35:0.8;
+function fit(cols){const xs=MT.x,ys=MT.y;let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;for(let i=0;i<xs.length;i++){x0=Math.min(x0,xs[i]);x1=Math.max(x1,xs[i]);y0=Math.min(y0,ys[i]);y1=Math.max(y1,ys[i])}
+ const W=$("#vit").clientWidth*(innerWidth<700?1:cols/12)-24,H=$("#vit").clientHeight-(innerWidth<700?70:60),pad=60;
+ return {z:+(Math.log2(Math.min(W/(x1-x0+2*pad),H/(y1-y0+2*pad)))-ZK).toFixed(2),x:(x0+x1)/2,y:(y0+y1)/2}}
+function preset(p,keep){state.preset=p;state.view=p=="niche"?VIEW[p]:fit(LAYOUTS[p][0][3]);document.querySelectorAll("#presets button").forEach(b=>{b.classList.toggle("on",b.dataset.p==p);b.setAttribute("aria-pressed",b.dataset.p==p)});
  if(!keep){state.extra=null;state.extraColors=null;lastQ="";askQ="";askBody=EMPTY;
   if(p=="overview"){state.enc="cellSetSelection";state.sel=Object.keys(STATECOL).filter(k=>k!="Other").map(k=>[SETS[0],k])}
   if(p=="arne"){state.enc="geneSelection";state.gene="◆ NE score (z)"}
