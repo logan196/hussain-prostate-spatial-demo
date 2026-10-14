@@ -1,6 +1,25 @@
 # Changelog
 The format follows [Keep a Changelog](https://keepachangelog.com/), and the project uses semantic versioning.
 
+## [1.1.0] - 2026-10-14
+### Added
+- LIVE **Distribution** side-panel section: a log-scale histogram with % detected, median and max for the coloured feature (#12).
+- Cell-type words (immune, T cell, macrophage, fibroblast, endothelial, proliferating, …) map to one labelled canonical marker gene (#11).
+- **Confidence preset**: 4 discrete voter-agreement levels (5/5, 4/5, 3/5 abstained, 2/5 abstained) plus a Spot Set Sizes chart (#10, #12).
+- PNG export now includes a legend: set swatches, or a plasma colour bar over the data min–max (#10).
+- Smoke test: a matrix-request budget (fails if a page fires >40 X-chunk requests), plus immune-query and Distribution checks (11 states).
+
+### Changed
+- H&E tiles are JPEG q75: 4.8 → 1.27 MB. First load is now 2.1 MB on desktop (was 2.9) and 2.0 MB on phone (was 7.7) (#9).
+- **Vitessce's histogram view removed.** It downloaded all 474 matrix chunks (~90 MB, 484 requests) in 3 presets and set off Pages 503s. Every preset now makes 8 matrix requests (#12).
+- Short Vitessce category names (`Cell state`: AR adeno, NE / t-SCNC, Amphicrine, Abstained), so legends no longer truncate (#10).
+- The Boundary niche preset auto-fits to the niche spots (#11).
+- `build_vitessce.py` is synced with the out-of-repo working copy.
+
+### Fixed
+- Proximity answers now highlight the AR-high set (AR program z>1, n=628) that distances are measured to, instead of the ensemble AR set (n=515) (#11).
+- The Spot Sets "select all" checkboxes no longer wrap onto their own line as bare "○" (#10).
+
 ## [1.0.0] - 2026-10-14
 Three audit → fix → verify cycles against the live Pages site. See `docs/AUDIT.md`.
 
