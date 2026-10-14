@@ -21,3 +21,13 @@ Each gene page has:
 - Provenance.
 
 Build the atlas with `python build_atlas.py` (after `analysis.py`). Data lives in `atlas/`: uint8 expression shards, per-gene detail JSON, `genes.json` and `meta.json`. The earlier single-page viewer is now `explorer.html`.
+
+## 3D & animations (showcase.html) and Vitessce (vitessce.html)
+- **showcase.html** (deck.gl 9, WebGL2). Four scenes:
+  - A dual-channel AR (blue) / NE (magenta) glow map, blended additively so co-expression shows as violet.
+  - A 3D extruded AR/NE landscape that grows in on load.
+  - An animated AR→NE sweep with a live NE/AR-vs-distance chart.
+  - A spatial↔UMAP morph.
+
+  It also has camera fly-to presets, a ▶ Tour fly-through, and animated stat counters and insight cards. URL parameters: `?scene=glow|land|sweep|umap&view=overview|tilt|ne|ar|edge&tour=1`.
+- **vitessce.html** (Vitessce 3.5.1 from CDN). Linked views: spatial (H&E OME-TIFF + spots), UMAP, gene list, region/Leiden sets, layer controller and expression histogram. Data is `vitessce/data.zarr` (327 genes, AnnData zarr v2) plus `vitessce/he.ome.tif`. It needs HTTP Range support, which GitHub Pages provides.
