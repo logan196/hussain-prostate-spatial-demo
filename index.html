@@ -173,10 +173,10 @@ function side(){$("#side").innerHTML=sec("ask",askQ?"Answer":"Ask the data","LIV
 /* fit the spot footprint to the spatial view so the first frame is the tissue, not black margin */
 /* measured: Vitessce spatialBeta draws this OME-TIFF at ~2^(z+0.8) css px per image px, so offset the analytic fit */
 const ZK=innerWidth<700?0.35:0.8;
-function fit(cols){const xs=MT.x,ys=MT.y;let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;for(let i=0;i<xs.length;i++){x0=Math.min(x0,xs[i]);x1=Math.max(x1,xs[i]);y0=Math.min(y0,ys[i]);y1=Math.max(y1,ys[i])}
+function fit(cols,f){const xs=MT.x,ys=MT.y;let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;for(let i=0;i<xs.length;i++){if(f&&!f(i))continue;x0=Math.min(x0,xs[i]);x1=Math.max(x1,xs[i]);y0=Math.min(y0,ys[i]);y1=Math.max(y1,ys[i])}
  const W=$("#vit").clientWidth*(innerWidth<700?1:cols/12)-24,H=$("#vit").clientHeight-(innerWidth<700?70:60),pad=60;
  return {z:+(Math.log2(Math.min(W/(x1-x0+2*pad),H/(y1-y0+2*pad)))-ZK).toFixed(2),x:(x0+x1)/2,y:(y0+y1)/2}}
-function preset(p,keep){state.preset=p;state.view=p=="niche"?VIEW[p]:fit(LAYOUTS[p][0][3]);document.querySelectorAll("#presets button").forEach(b=>{b.classList.toggle("on",b.dataset.p==p);b.setAttribute("aria-pressed",b.dataset.p==p)});
+function preset(p,keep){state.preset=p;state.view=fit(LAYOUTS[p][0][3],p=="niche"?(i=>SP.region[i]==1||SP.region[i]==2||(SP.state[i]==1&&SP.dist[i]<=500)):null);document.querySelectorAll("#presets button").forEach(b=>{b.classList.toggle("on",b.dataset.p==p);b.setAttribute("aria-pressed",b.dataset.p==p)});
  if(!keep){state.extra=null;state.extraColors=null;lastQ="";askQ="";askBody=EMPTY;
   if(p=="overview"){state.enc="cellSetSelection";state.sel=Object.keys(STATECOL).filter(k=>k!="Other").map(k=>CS(k))}
   if(p=="arne"){state.enc="geneSelection";state.gene="◆ NE score (z)"}
@@ -207,7 +207,10 @@ function regionGroups(text){const t=text.toLowerCase(),R=[];
 function dist(text){const m=text.match(/(\d+(?:\.\d+)?)\s*(µm|um|micron|microns|mm)\b/i);if(!m)return null;return m[2].toLowerCase()=="mm"?+m[1]*1000:+m[1]}
 const stats=(v,f)=>{let n=0,s=0,p=0;for(let i=0;i<N;i++)if(f(i)){n++;s+=v[i];if(v[i]>0)p++}return {n,mean:n?s/n:0,pct:n?100*p/n:0}};
 function answer(parsed,html){askQ=$("#q").value;lastQ=askQ;syncURL();OPEN.ask=true;askBody=`<div class="q">“${askQ}”</div><div class="pchips">${parsed.map(p=>`<span>${p}</span>`).join("")}</div>${html}<div class="foot">Computed in your browser from per-spot data.</div>`;side()}
-async function ask(q){q=q.trim();if(!q)return;await genesReady;const t=q.toLowerCase(),G=findGene(q),R=regionGroups(q),D=dist(q);
+/* cell-type words -> one canonical marker gene (shown as such; this is not a cell-type call) */
+const MARK=[[/immune|leuk|lymphocyte/,"PTPRC"],[/t[\s-]?cell/,"CD3E"],[/cd8|cytotoxic/,"CD8A"],[/b[\s-]?cell/,"MS4A1"],[/macrophage|myeloid/,"CD68"],[/fibroblast|caf\b/,"COL1A1"],[/endotheli|vessel|vascular/,"PECAM1"],[/prolifer|cycling|dividing/,"MKI67"],[/smooth muscle/,"ACTA2"],[/basal/,"KRT5"],[/epitheli/,"EPCAM"],[/tuft/,"POU2F3"]];
+async function ask(q){q=q.trim();if(!q)return;await genesReady;const t=q.toLowerCase(),R=regionGroups(q),D=dist(q);let G=findGene(q);
+ if(!G){const m=MARK.find(([re])=>re.test(t));if(m)G={g:m[1],how:`marker for “${t.match(m[0])[0]}”`}}
  const P=[];if(G)P.push("gene: "+G.g+(G.how!="exact"?` (${G.how})`:""));if(R.length)P.push("regions: "+R.map(r=>r.name).join(", "));if(D)P.push("distance ≤ "+D+" µm");
  // intent: correlated
  if(G&&/correlat|co-?express|similar to|like /.test(t)){P.unshift("intent: correlates");const d=await detail(SYM[G.g.toUpperCase()]);state.enc="geneSelection";state.gene=d.cor[0][0];preset("gene",true);
@@ -225,15 +228,15 @@ async function ask(q){q=q.trim();if(!q)return;await genesReady;const t=q.toLower
   const nm=tgt==-1?"Abstained":LAB[tgt];if(!D)P.push("distance ≤ 500 µm (default)");
   const all=SP.barcode.map((b,i)=>i).filter(i=>SP.state[i]==tgt),near=all.filter(i=>SP.dist[i]<=Dm),far=all.filter(i=>SP.dist[i]>Dm);
   setExtra("Query: proximity",[[`${nm} ≤${Dm} µm from AR`,near.map(i=>SP.barcode[i]),[250,204,21]],[`${nm} >${Dm} µm`,far.map(i=>SP.barcode[i]),[236,72,153]]]);
-  state.sel=[["Query: proximity",`${nm} ≤${Dm} µm from AR`],["Query: proximity",`${nm} >${Dm} µm`],CS("AR adenocarcinoma")];preset("overview",true);
+  state.sel=[["Query: proximity",`${nm} ≤${Dm} µm from AR`],["Query: proximity",`${nm} >${Dm} µm`],[SETS[1],"AR region"]];preset("overview",true);
   const md=all.map(i=>SP.dist[i]).sort((a,b)=>a-b)[Math.floor(all.length/2)];
-  return answer(P,`<div class="hero"><b>${near.length} </b><span>of ${all.length} ${nm} spots</span></div><p>are within <b>${Dm} µm</b> of an AR-high spot (${pct(near.length,all.length||1)}). Median distance for this state: <b>${md} µm</b>. Yellow = near, magenta = far, blue = AR.</p>`)}
+  return answer(P,`<div class="hero"><b>${near.length} </b><span>of ${all.length} ${nm} spots</span></div><p>are within <b>${Dm} µm</b> of an AR-high spot (${pct(near.length,all.length||1)}). Median distance for this state: <b>${md} µm</b>.</p><div class="leg2" style="margin-top:8px"><i style="background:rgb(250,204,21)"></i><span>near (≤${Dm} µm)</span><span class="n">${near.length}</span><span class="p"></span><i style="background:rgb(236,72,153)"></i><span>far</span><span class="n">${far.length}</span><span class="p"></span><i style="background:rgb(79,140,255)"></i><span>AR-high reference (AR program z&gt;1)</span><span class="n">628</span><span class="p"></span></div>`)}
  // intent: show a state
  const stMap=[[/amphi|dual|hybrid/,2],[/abstain|uncertain|low.?conf/,-1],[/strom/,3],[/\bne\b|neuroendo|t-?scnc|small.?cell/,1],[/\bar\b|adeno/,0]];
  if(!G&&/show|where|highlight|find|which/.test(t)){const hit=stMap.find(([re])=>re.test(t));if(hit){P.unshift("intent: show state");const k=hit[1],nm=k==-1?"Abstained (low confidence)":LAB[k];
   state.enc="cellSetSelection";state.sel=[CS(nm)];preset(k==2?"niche":"overview",true);state.extra=null;state.sel=[CS(nm)];render();
   const idx=SP.barcode.map((_,i)=>i).filter(i=>(k==-1?SP.state[i]==-1:SP.state[i]==k)),md=idx.map(i=>SP.dist[i]).sort((a,b)=>a-b)[Math.floor(idx.length/2)]||0,mc=idx.reduce((s,i)=>s+SP.conf[i],0)/(idx.length||1);
-  return answer(P,`<div class="hero"><b>${idx.length} </b><span>spots · ${pct(idx.length,N)}</span></div><p><b>${nm}</b>: median distance to AR <b>${md} µm</b>, mean voter agreement <b>${mc.toFixed(2)}</b>.</p>`)}}
+  return answer(P,`<div class="hero"><b>${idx.length} </b><span>spots · ${pct(idx.length,N)}</span></div><p><b>${nm}</b>: median distance to the nearest AR-high spot <b>${md} µm</b>, mean voter agreement <b>${mc.toFixed(2)}</b>.</p>`)}}
  // intent: where is gene high
  if(G){P.unshift("intent: localize gene");const gi=SYM[G.g.toUpperCase()],v=await expr(gi),nz=[...v].filter(x=>x>0).sort((a,b)=>a-b);
   state.enc="geneSelection";state.gene=GI.rows[gi][0];preset("gene",true);
