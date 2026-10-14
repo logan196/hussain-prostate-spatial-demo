@@ -82,7 +82,7 @@ Mechanistic work shows NE cells arise from KRT8+ luminal cells and then expand a
 3. Lu X et al. NKX2-1 drives neuroendocrine transdifferentiation of prostate cancer via epigenetic and 3D chromatin remodeling. *Nat Genet* 2025. doi:10.1038/s41588-025-02265-4
 4. Beshiri ML et al. Stem cell dynamics and cellular heterogeneity across lineage subtypes of castrate-resistant prostate cancer. *Stem Cells* 2024. doi:10.1093/stmcls/sxae025, PMID 38563224
 5. Watanabe R et al. Spatial gene expression analysis reveals characteristic gene expression patterns of de novo NEPC coexisting with ARPC. *Int J Mol Sci* 2023. doi:10.3390/ijms24108955, PMID 37240308 (GEO GSE230282)
-6. Salachan PV et al. Spatial whole transcriptome profiling of primary tumor from patients with metastatic prostate cancer. *Int J Cancer* 2023.
+6. Salachan PV et al. Spatial whole transcriptome profiling of primary tumor from patients with metastatic prostate cancer. *Int J Cancer* 2023. doi:10.1002/ijc.34708
 7. Bakht MK, …, Beltran H. Spatial heterogeneity atlas of prostate cancer evolution (SHAPE). *Cancer Res* 2026;86(2 Suppl):PR027 (abstract).
 8. Ma C et al. Inferring allele-specific copy number aberrations and tumor phylogeography from spatially resolved transcriptomics (CalicoST). *Nat Methods* 2024;21:2239–2247. doi:10.1038/s41592-024-02438-9, PMID 39478176
 9. Erickson A et al. Clonal phylogenies inferred from bulk, single cell, and spatial transcriptomic analysis of epithelial cancers. *PLoS One* 2025. doi:10.1371/journal.pone.0316475
