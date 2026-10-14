@@ -30,7 +30,12 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
 .ok:before{content:"✓";color:var(--grn)}.no:before{content:"✗";color:#f87171}.mid:before{content:"~";color:var(--amb)}
 .note{font-size:10.8px;color:var(--mut2);margin-top:6px;line-height:1.4}
 svg text{font-family:var(--mono);font-size:9px;fill:#9aa6b6}
-#loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--mut)}
+.left{position:relative;min-width:0;overflow:hidden}#vit{height:100%}
+#boot{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 40%,#0f1826,#05070a 70%);transition:opacity .5s}
+#boot.done{opacity:0;pointer-events:none}#boot .bx{width:320px}#boot .bt{font-size:18px;font-weight:650;background:linear-gradient(110deg,#4f8cff,#ec4899);-webkit-background-clip:text;color:transparent}
+#boot .bs{color:var(--mut);font-size:12px;margin:4px 0 14px}#boot .bar{height:4px;background:#1b2330;border-radius:2px;overflow:hidden}#boot .bar i{display:block;height:100%;width:3%;background:linear-gradient(90deg,#4f8cff,#ec4899);transition:width .3s}
+#boot ul{list-style:none;margin:14px 0 8px;font-size:12px;color:#5d6878}#boot li{margin:5px 0;padding-left:18px;position:relative}#boot li:before{content:"○";position:absolute;left:0}#boot li.ok{color:#cfd7e3}#boot li.ok:before{content:"✓";color:#34d399}
+#boot .bb{font-family:var(--mono);font-size:10.5px;color:#5d6878}
 
 .side{border-left:1px solid #000;background:#000;overflow:auto;padding:6px 8px 12px;display:flex;flex-direction:column;gap:6px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
 .sec{background:#222;border-radius:4px;overflow:hidden}
@@ -61,12 +66,21 @@ svg text{font-family:var(--mono);font-size:9px;fill:#9aa6b6}
 <div class="seg" id="presets"><button data-p="overview" class="on">Overview</button><button data-p="arne">AR vs NE</button><button data-p="niche">Boundary niche</button><button data-p="gene">Gene query</button></div>
 <div class="ask"><input id="q" placeholder='Ask: "show NE cells near AR tumor", "where is SYP high", "compare KLK3 in AR vs NE"…' autocomplete="off"></div>
 <nav><a href="showcase.html">3D &amp; animations</a><a href="atlas.html">Gene atlas</a><a href="brief.html">Brief</a><a href="Novaflow_Hussain_Plan.pdf">Plan</a></nav></div>
-<div class="main"><div id="vit"><div id="loading">Loading Vitessce and 18,939-gene matrix…</div></div><div class="side" id="side"></div></div>
+<div class="main"><div class="left"><div id="vit"></div><div id="boot" role="status" aria-live="polite"><div class="bx"><div class="bt">Prostate Spatial Atlas</div><div class="bs">GSE230282 · Visium CytAssist FFPE · 4,394 spots</div><div class="bar"><i id="bootbar"></i></div><ul id="bootsteps"><li data-k="code">Viewer code</li><li data-k="spots">Spot coordinates &amp; calls</li><li data-k="img">H&amp;E tiles</li><li data-k="mat">Expression matrix (lazy, per gene)</li></ul><div class="bb" id="bootbytes">starting…</div></div></div></div><div class="side" id="side"></div></div>
 <script type="module">
 import React from "react";import {createRoot} from "react-dom/client";import {Vitessce} from "vitessce";
 const $=s=>document.querySelector(s),base=new URL(".",location.href).href,fmt=(v,d=2)=>v==null||isNaN(v)?"–":(+v).toFixed(d);
-const [GI,SP,ST,AL,MT]=await Promise.all(["atlas/genes.json","vitessce/spots.json","stats.json","atlas/aliases.json","atlas/meta.json"].map(u=>fetch(u).then(r=>r.json())));
-const SYM={};GI.rows.forEach((r,i)=>SYM[r[0].toUpperCase()]=i);const N=SP.barcode.length,LAB=SP.labels,ENS=SP.ensemble,HYP=SP.hyp;
+/* boot progress: real resource timings, not a fake timer */
+const boot={t0:performance.now(),bytes:0,done:new Set()};
+const mark=k=>{if(boot.done.has(k))return;boot.done.add(k);const li=document.querySelector(`#bootsteps li[data-k="${k}"]`);if(li)li.classList.add("ok");$("#bootbar").style.width=(10+22*boot.done.size)+"%"};
+new PerformanceObserver(l=>{for(const e of l.getEntries()){boot.bytes+=e.transferSize||e.encodedBodySize||0;const u=e.name;
+ if(/vitessce@|esm\.sh/.test(u))mark("code");if(/spots\.json/.test(u))mark("spots");if(/he\.ome\.tif/.test(u))mark("img");if(/data\.zarr\/X\//.test(u))mark("mat")}
+ $("#bootbytes").textContent=`${(boot.bytes/1e6).toFixed(1)} MB · ${((performance.now()-boot.t0)/1000).toFixed(1)} s`}).observe({type:"resource",buffered:true});
+function bootCheck(){const c=document.querySelectorAll("#vit canvas").length;if(c>=2&&boot.done.has("img")||performance.now()-boot.t0>45000){mark("code");$("#boot").classList.add("done");window.__ready=+(performance.now()/1000).toFixed(2)}else setTimeout(bootCheck,200)}
+const [SP,ST,MT]=await Promise.all(["vitessce/spots.json","stats.json","atlas/meta.json"].map(u=>fetch(u).then(r=>r.json())));
+/* gene index + aliases (0.9 MB) are only needed for queries: loaded after first paint */
+let GI=null,AL=null;const SYM={};
+const genesReady=(async()=>{[GI,AL]=await Promise.all(["atlas/genes.json","atlas/aliases.json"].map(u=>fetch(u).then(r=>r.json())));GI.rows.forEach((r,i)=>SYM[r[0].toUpperCase()]=i)})();const N=SP.barcode.length,LAB=SP.labels,ENS=SP.ensemble,HYP=SP.hyp;
 const EX={},DT={};
 async function expr(gi){const s=Math.floor(gi/GI.shard);if(!EX[s])EX[s]=fetch(`atlas/expr/${String(s).padStart(3,"0")}.bin`).then(r=>r.arrayBuffer()).then(b=>new Uint8Array(b));
  const d=await detail(gi),a=await EX[s],o=(gi%GI.shard)*N;return Float32Array.from(a.subarray(o,o+N),v=>v*d.scale)}
@@ -102,7 +116,7 @@ function insights(p){const S=ST,c=ENS.counts,ne=S.NE_to_nearest_AR_um;
  const T={overview:[[S.spots_after_qc.toLocaleString(),"spots after QC"],[c["NE / t-SCNC-like"],"NE spots"],[c["AR adenocarcinoma"],"AR spots"],[ENS.abstention_rate_pct+"%","abstained"]],
   arne:[[S.AR_NE_score_pearson_r,"AR vs NE score r"],[S.nhood_enrichment_z["AR-high"]["NE-high"],"AR↔NE neighbour z"],[(ne.median/1000).toFixed(2)+" mm","median NE→AR"],[S.dual_fraction_of_all_spots_pct+"%","dual-high spots"]],
   niche:[[c["Amphicrine (AR+NE)"]||0,"amphicrine spots"],[HYP.amphicrine_dist_median_um+" µm","amphicrine→AR"],[`${HYP.NE_state_within_500um_of_AR}/${HYP.NE_state_total}`,"NE within 500 µm"],[`${S.AR_spots_bordering_NE}/${S.AR_spots_total_pure}`,"AR touching NE"]],
-  gene:[[GI.rows.length.toLocaleString(),"genes queryable"],["5","◆ derived features"],["0.58","ρ distance vs NE"],["18,944","matrix columns"]]}[p];
+  gene:[[MT.G.toLocaleString(),"genes queryable"],["5","◆ derived features"],["0.58","ρ distance vs NE"],["18,944","matrix columns"]]}[p];
  return `<div class="tiles">${T.map(([v,l])=>`<div class="tile"><div class="v">${v}</div><div class="l">${l}</div></div>`).join("")}</div><div class="foot">From stats.json and the ensemble calls.</div>`}
 function hyp(){const G=ST.NE_AR_by_distance_to_AR_um,W=330,H=120,L=30,R=8,T=10,B=24,xs=G.map((_,i)=>L+i*(W-L-R)/(G.length-1)),y0=-1,y1=1.5,y=z=>T+(y1-z)/(y1-y0)*(H-T-B);
  const path=k=>G.map((g,i)=>`${i?"L":"M"}${xs[i].toFixed(1)},${y(g[k]).toFixed(1)}`).join("");
@@ -157,7 +171,7 @@ function regionGroups(text){const t=text.toLowerCase(),R=[];
 function dist(text){const m=text.match(/(\d+(?:\.\d+)?)\s*(µm|um|micron|microns|mm)\b/i);if(!m)return null;return m[2].toLowerCase()=="mm"?+m[1]*1000:+m[1]}
 const stats=(v,f)=>{let n=0,s=0,p=0;for(let i=0;i<N;i++)if(f(i)){n++;s+=v[i];if(v[i]>0)p++}return {n,mean:n?s/n:0,pct:n?100*p/n:0}};
 function answer(parsed,html){askQ=$("#q").value;OPEN.ask=true;askBody=`<div class="q">“${askQ}”</div><div class="pchips">${parsed.map(p=>`<span>${p}</span>`).join("")}</div>${html}<div class="foot">Computed in your browser from per-spot data.</div>`;side()}
-async function ask(q){q=q.trim();if(!q)return;const t=q.toLowerCase(),G=findGene(q),R=regionGroups(q),D=dist(q);
+async function ask(q){q=q.trim();if(!q)return;await genesReady;const t=q.toLowerCase(),G=findGene(q),R=regionGroups(q),D=dist(q);
  const P=[];if(G)P.push("gene: "+G.g+(G.how!="exact"?` (${G.how})`:""));if(R.length)P.push("regions: "+R.map(r=>r.name).join(", "));if(D)P.push("distance ≤ "+D+" µm");
  // intent: correlated
  if(G&&/correlat|co-?express|similar to|like /.test(t)){P.unshift("intent: correlates");const d=await detail(SYM[G.g.toUpperCase()]);state.enc="geneSelection";state.gene=d.cor[0][0];preset("gene",true);
@@ -198,5 +212,5 @@ async function ask(q){q=q.trim();if(!q)return;const t=q.toLowerCase(),G=findGene
 $("#q").onkeydown=e=>{if(e.key=="Enter")ask(e.target.value)};
 window.ask=ask;window.preset=preset;
 const U=new URLSearchParams(location.search);preset(U.get("preset")||"overview");if(U.get("q")){$("#q").value=U.get("q");ask(U.get("q"))}
-window.onresize=()=>render();
+window.onresize=()=>render();bootCheck();
 </script></body></html>

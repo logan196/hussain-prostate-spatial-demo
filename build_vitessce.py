@@ -57,7 +57,15 @@ b.obsm["spatial"] = np.c_[m["x"], m["y"]].astype(np.float32); b.obsm["X_umap"] =
 shutil.rmtree(OUT + "/data.zarr", ignore_errors=True); b.write_zarr(OUT + "/data.zarr", chunks=(b.n_obs, 40))
 # H&E OME-TIFF (interleaved RGB)
 im = np.array(Image.open("portal/atlas/tissue_hires.jpg").convert("RGB"))
-tifffile.imwrite(OUT + "/he.ome.tif", im.transpose(2, 0, 1), photometric="minisblack", metadata={"axes": "CYX", "Channel": {"Name": ["R", "G", "B"]}}, ome=True)
+# pyramidal, tiled, deflate-compressed: the viewer fetches only the tiles on screen
+from PIL import Image as _I
+cyx = im.transpose(2, 0, 1); levels = [cyx]
+while max(levels[-1].shape[1:]) > 512:
+    h, w = levels[-1].shape[1:]; levels.append(np.stack([np.array(_I.fromarray(c).resize((w // 2, h // 2), _I.LANCZOS)) for c in levels[-1]]))
+with tifffile.TiffWriter(OUT + "/he.ome.tif", ome=True, bigtiff=False) as tw:
+    opts = dict(photometric="minisblack", tile=(256, 256), compression="zlib", compressionargs={"level": 9})
+    tw.write(levels[0], subifds=len(levels) - 1, metadata={"axes": "CYX", "Channel": {"Name": ["R", "G", "B"]}}, **opts)
+    for lv in levels[1:]: tw.write(lv, subfiletype=1, **opts)
 # client-side per-spot data for live queries
 json.dump({"barcode": list(a.obs_names), "state": [int(s) for s in state], "conf": np.round(agree, 2).tolist(), "dist": np.round(d).astype(int).tolist(),
            "region": m["region"], "regions": m["regions"], "labels": LAB, "ensemble": ens, "hyp": hyp},
