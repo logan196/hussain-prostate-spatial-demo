@@ -1,6 +1,15 @@
 # Changelog
 The format follows [Keep a Changelog](https://keepachangelog.com/), and the project uses semantic versioning.
 
+## [2.0.0] - 2026-10-26 (branch v2-live-llm, not merged)
+### Added
+- Live LLM chat: `api/ask.js` Vercel function (Anthropic Messages API, forced `respond` tool) drives presets, colouring, highlights and zoom; `?q=` share links run through it.
+- In-browser hypothesis tests with result cards: proximity, neighbourhood enrichment, co-occurrence, Wilcoxon (`v2/stats.js`, Web Worker, seeded permutations).
+- Rate limiting (per IP, per day, per instance; optional Upstash Redis), origin check, input and output caps.
+- `verify/verify_tests.py` (squidpy 1.8.2, scipy, exact permutation replica), `scripts/dev-server.mjs`, `test/stats.test.mjs`.
+### Changed
+- Distances in v2 tests use the array's 100 µm spot pitch as the scale (v1 panels unchanged; see README).
+
 ## [1.1.0] - 2026-10-14
 ### Added
 - LIVE **Distribution** side-panel section: a log-scale histogram with % detected, median and max for the coloured feature (#12).

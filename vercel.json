@@ -1,0 +1,37 @@
+{
+ "functions": {
+  "api/ask.js": {
+   "maxDuration": 30,
+   "memory": 256
+  }
+ },
+ "headers": [
+  {
+   "source": "/(.*)",
+   "headers": [
+    {
+     "key": "X-Robots-Tag",
+     "value": "noindex"
+    }
+   ]
+  },
+  {
+   "source": "/vitessce/(.*)",
+   "headers": [
+    {
+     "key": "Cache-Control",
+     "value": "public, max-age=86400"
+    }
+   ]
+  },
+  {
+   "source": "/atlas/(.*)",
+   "headers": [
+    {
+     "key": "Cache-Control",
+     "value": "public, max-age=86400"
+    }
+   ]
+  }
+ ]
+}

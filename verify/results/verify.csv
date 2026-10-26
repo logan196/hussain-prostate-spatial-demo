@@ -1,0 +1,5 @@
+id,test,A,B,nA_used,nB_used,nA_ui,nB_ui,groups_match,stat,ui,py,ui_p,py_p,engine,ok,auc_ui,auc_py,replica,edges_ui,edges_py,z_squidpy,z_ui,z_diff_vs_squidpy
+t1,proximity,NE-high,AR-high,890,628,890,628,True,mean nearest A-B (um) / z [null: all],1473.066 / 526.990,1473.066 / 526.990,closer 1 farther 0.001,closer 1 farther 0.001,scipy cKDTree + seeded replica,True,,,,,,,,
+t2,proximity,CHGA+,AR-high,50,600,50,600,True,mean nearest A-B (um) / z [null: all],362.343 / 24.689,362.343 / 24.689,closer 1 farther 0.001,closer 1 farther 0.001,scipy cKDTree + seeded replica,True,,,,,,,,
+t3,wilcoxon,Leiden 3,Leiden 7,550,208,550,208,True,U,111657.5,111657.5,5.10507858568177e-93,5.105078585681478e-93,scipy.stats.mannwhitneyu,True,0.9760270979020979,0.9760270979020979,,,,,,
+t4,nhood_enrichment,AR-high,NE-high,628,890,628,890,True,A-B neighbour pairs / z,6 / -30.113,"6 / -30.947 (squidpy, own RNG)",enr 1 dep 0.001,enr 1 dep 0.001 (replica),squidpy.gr.nhood_enrichment 1.8.2,True,,,6 / -30.113,24134.0,24134.0,-30.947107018982262,-30.112618572815478,0.8344884461667839

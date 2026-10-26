@@ -1,0 +1,9 @@
+{
+ "name": "hussain-prostate-spatial-demo",
+ "private": true,
+ "type": "module",
+ "version": "2.0.0",
+ "engines": {
+  "node": ">=18"
+ }
+}

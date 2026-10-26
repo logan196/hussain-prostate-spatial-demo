@@ -1,0 +1,664 @@
+{
+ "base": "http://localhost:8765/",
+ "health": "live LLM",
+ "questions": [
+  {
+   "q": "show NE cells near AR tumor",
+   "ms_to_done": 12309,
+   "model": "claude-sonnet-4-5-20250929",
+   "llm_ms": 6313,
+   "answer": "Highlighting NE-high spots (pink) and AR-high spots (blue) to show their spatial relationship. A proximity test will assess whether NE spots are closer to AR spots than expected by chance.",
+   "interpretation": "User said \"cells\" which maps to Visium spots. \"NE cells\" interpreted as NE-high program spots, \"AR tumor\" as AR-high program spots.",
+   "view_call": {
+    "preset": "overview",
+    "highlight": [
+     {
+      "group": {
+       "kind": "program",
+       "value": "NE-high"
+      },
+      "color": "#ec4899"
+     },
+     {
+      "group": {
+       "kind": "program",
+       "value": "AR-high"
+      },
+      "color": "#4f8cff"
+     }
+    ],
+    "zoom_to": "highlight"
+   },
+   "tests_called": [
+    {
+     "test": "proximity",
+     "group_a": {
+      "kind": "program",
+      "value": "NE-high",
+      "label": "NE-high"
+     },
+     "group_b": {
+      "kind": "program",
+      "value": "AR-high",
+      "label": "AR-high"
+     },
+     "n_perms": 999
+    }
+   ],
+   "before": {
+    "preset": "overview",
+    "enc": "cellSetSelection",
+    "gene": "◆ NE score (z)",
+    "sel": [
+     [
+      "Cell state",
+      "AR adeno"
+     ],
+     [
+      "Cell state",
+      "NE / t-SCNC"
+     ],
+     [
+      "Cell state",
+      "Amphicrine"
+     ],
+     [
+      "Cell state",
+      "Stroma"
+     ],
+     [
+      "Cell state",
+      "Abstained"
+     ]
+    ],
+    "extra": null,
+    "view": {
+     "z": -1.44,
+     "x": 1118.35,
+     "y": 703.8000000000001
+    }
+   },
+   "after": {
+    "preset": "overview",
+    "enc": "cellSetSelection",
+    "gene": "◆ NE score (z)",
+    "sel": [
+     [
+      "Ask",
+      "NE-high (890)"
+     ],
+     [
+      "Ask",
+      "AR-high (628)"
+     ]
+    ],
+    "extra": [
+     "NE-high (890):890",
+     "AR-high (628):628"
+    ],
+    "view": {
+     "z": -1.44,
+     "x": 1119.6,
+     "y": 709.7
+    }
+   },
+   "view_changed": true,
+   "pixels_before": "e138de87edbe",
+   "pixels_after": "e10a7f5a9374",
+   "pixels_changed": true,
+   "results": [
+    {
+     "id": "t1",
+     "test": "proximity",
+     "a": {
+      "label": "NE-high",
+      "how": "program z>1",
+      "n": 890,
+      "n_used": 890
+     },
+     "b": {
+      "label": "AR-high",
+      "how": "program z>1",
+      "n": 628,
+      "n_used": 628
+     },
+     "gene": null,
+     "params": {
+      "n_perms": 999,
+      "seed": 0,
+      "within_um": 250,
+      "null_scope": "all"
+     },
+     "obs": 1473.0664866270595,
+     "z": 526.9899114701243,
+     "p": {
+      "closer": 1,
+      "farther": 0.001
+     }
+    }
+   ]
+  },
+  {
+   "q": "where do CHGA+ cells sit relative to AR-high regions?",
+   "ms_to_done": 9453,
+   "model": "claude-sonnet-4-5-20250929",
+   "llm_ms": 6177,
+   "answer": "Highlighting CHGA-expressing spots (pink) and AR-high spots (blue) to show their spatial relationship. A proximity test will assess whether CHGA+ spots are closer to AR-high regions than expected by chance.",
+   "interpretation": "Reading \"cells\" as spots. CHGA (chromogranin A) expression threshold set at >1 log-normalized expression.",
+   "view_call": {
+    "preset": "overview",
+    "highlight": [
+     {
+      "group": {
+       "kind": "gene",
+       "gene": "CHGA",
+       "op": ">",
+       "threshold": 1,
+       "label": "CHGA+"
+      },
+      "color": "#ec4899"
+     },
+     {
+      "group": {
+       "kind": "program",
+       "value": "AR-high",
+       "label": "AR-high"
+      },
+      "color": "#4f8cff"
+     }
+    ]
+   },
+   "tests_called": [
+    {
+     "test": "proximity",
+     "group_a": {
+      "kind": "gene",
+      "gene": "CHGA",
+      "op": ">",
+      "threshold": 1,
+      "label": "CHGA+"
+     },
+     "group_b": {
+      "kind": "program",
+      "value": "AR-high",
+      "label": "AR-high"
+     },
+     "n_perms": 999
+    }
+   ],
+   "before": {
+    "preset": "overview",
+    "enc": "cellSetSelection",
+    "gene": "◆ NE score (z)",
+    "sel": [
+     [
+      "Ask",
+      "NE-high (890)"
+     ],
+     [
+      "Ask",
+      "AR-high (628)"
+     ]
+    ],
+    "extra": [
+     "NE-high (890):890",
+     "AR-high (628):628"
+    ],
+    "view": {
+     "z": -1.44,
+     "x": 1119.6,
+     "y": 709.7
+    }
+   },
+   "after": {
+    "preset": "overview",
+    "enc": "cellSetSelection",
+    "gene": "◆ NE score (z)",
+    "sel": [
+     [
+      "Ask",
+      "CHGA+ (78)"
+     ],
+     [
+      "Ask",
+      "AR-high (628)"
+     ]
+    ],
+    "extra": [
+     "CHGA+ (78):78",
+     "AR-high (628):628"
+    ],
+    "view": {
+     "z": -1.44,
+     "x": 1118.35,
+     "y": 703.8000000000001
+    }
+   },
+   "view_changed": true,
+   "pixels_before": "e10a7f5a9374",
+   "pixels_after": "aa14281ae917",
+   "pixels_changed": true,
+   "results": [
+    {
+     "id": "t2",
+     "test": "proximity",
+     "a": {
+      "label": "CHGA+",
+      "how": "CHGA log-norm expression > 1",
+      "n": 78,
+      "n_used": 50
+     },
+     "b": {
+      "label": "AR-high",
+      "how": "program z>1",
+      "n": 628,
+      "n_used": 600
+     },
+     "gene": null,
+     "params": {
+      "n_perms": 999,
+      "seed": 0,
+      "within_um": 250,
+      "null_scope": "all"
+     },
+     "obs": 362.3432085921177,
+     "z": 24.68893946547569,
+     "p": {
+      "closer": 1,
+      "farther": 0.001
+     }
+    }
+   ]
+  },
+  {
+   "q": "compare SYP in core 3 vs core 7",
+   "ms_to_done": 10073,
+   "model": "claude-sonnet-4-5-20250929",
+   "llm_ms": 6312,
+   "answer": "Comparing SYP (synaptophysin) expression between Leiden cluster 3 and Leiden cluster 7. A Wilcoxon test will assess differential expression between these two clusters.",
+   "interpretation": "User said \"core 3\" and \"core 7\" which are mapped to Leiden clusters 3 and 7 respectively, as there is only one tissue section. \"Cells\" read as spots.",
+   "view_call": {
+    "color_by": {
+     "kind": "gene",
+     "gene": "SYP"
+    },
+    "highlight": [
+     {
+      "group": {
+       "kind": "leiden",
+       "value": "3",
+       "label": "Leiden 3"
+      },
+      "color": "#ec4899"
+     },
+     {
+      "group": {
+       "kind": "leiden",
+       "value": "7",
+       "label": "Leiden 7"
+      },
+      "color": "#4f8cff"
+     }
+    ]
+   },
+   "tests_called": [
+    {
+     "test": "wilcoxon",
+     "gene": "SYP",
+     "group_a": {
+      "kind": "leiden",
+      "value": "3",
+      "label": "Leiden 3"
+     },
+     "group_b": {
+      "kind": "leiden",
+      "value": "7",
+      "label": "Leiden 7"
+     }
+    }
+   ],
+   "before": {
+    "preset": "overview",
+    "enc": "cellSetSelection",
+    "gene": "◆ NE score (z)",
+    "sel": [
+     [
+      "Ask",
+      "CHGA+ (78)"
+     ],
+     [
+      "Ask",
+      "AR-high (628)"
+     ]
+    ],
+    "extra": [
+     "CHGA+ (78):78",
+     "AR-high (628):628"
+    ],
+    "view": {
+     "z": -1.44,
+     "x": 1118.35,
+     "y": 703.8000000000001
+    }
+   },
+   "after": {
+    "preset": "overview",
+    "enc": "geneSelection",
+    "gene": "SYP",
+    "sel": [
+     [
+      "Ask",
+      "CHGA+ (78)"
+     ],
+     [
+      "Ask",
+      "AR-high (628)"
+     ]
+    ],
+    "extra": null,
+    "view": {
+     "z": -1.44,
+     "x": 1118.35,
+     "y": 703.8000000000001
+    }
+   },
+   "view_changed": true,
+   "pixels_before": "aa14281ae917",
+   "pixels_after": "84f0b364eb92",
+   "pixels_changed": true,
+   "results": [
+    {
+     "id": "t3",
+     "test": "wilcoxon",
+     "a": {
+      "label": "Leiden 3",
+      "how": "Leiden cluster",
+      "n": 550,
+      "n_used": 550
+     },
+     "b": {
+      "label": "Leiden 7",
+      "how": "Leiden cluster",
+      "n": 208,
+      "n_used": 208
+     },
+     "gene": "SYP",
+     "params": {
+      "gene": "SYP",
+      "gene_how": "exact"
+     },
+     "obs": 111657.5,
+     "z": 20.4581271351585,
+     "p": {
+      "two_sided": 5.10507858568177e-93
+     }
+    }
+   ]
+  },
+  {
+   "q": "are AR-high and NE-high spots neighbours more often than chance?",
+   "ms_to_done": 8879,
+   "model": "claude-sonnet-4-5-20250929",
+   "llm_ms": 5761,
+   "answer": "Highlighting AR-high spots (pink) and NE-high spots (blue) to test whether they are neighbours more often than expected by chance. A neighbourhood enrichment test will compute the z-score of AR-NE contacts on a spatial graph.",
+   "interpretation": "User asks about neighbourhood enrichment between AR-high and NE-high spots.",
+   "view_call": {
+    "preset": "overview",
+    "highlight": [
+     {
+      "group": {
+       "kind": "program",
+       "value": "AR-high"
+      },
+      "color": "#ec4899"
+     },
+     {
+      "group": {
+       "kind": "program",
+       "value": "NE-high"
+      },
+      "color": "#4f8cff"
+     }
+    ],
+    "zoom_to": "highlight"
+   },
+   "tests_called": [
+    {
+     "test": "nhood_enrichment",
+     "group_a": {
+      "kind": "program",
+      "value": "AR-high",
+      "label": "AR-high"
+     },
+     "group_b": {
+      "kind": "program",
+      "value": "NE-high",
+      "label": "NE-high"
+     },
+     "n_perms": 999
+    }
+   ],
+   "before": {
+    "preset": "overview",
+    "enc": "geneSelection",
+    "gene": "SYP",
+    "sel": [
+     [
+      "Ask",
+      "CHGA+ (78)"
+     ],
+     [
+      "Ask",
+      "AR-high (628)"
+     ]
+    ],
+    "extra": null,
+    "view": {
+     "z": -1.44,
+     "x": 1118.35,
+     "y": 703.8000000000001
+    }
+   },
+   "after": {
+    "preset": "overview",
+    "enc": "cellSetSelection",
+    "gene": "SYP",
+    "sel": [
+     [
+      "Ask",
+      "AR-high (628)"
+     ],
+     [
+      "Ask",
+      "NE-high (890)"
+     ]
+    ],
+    "extra": [
+     "AR-high (628):628",
+     "NE-high (890):890"
+    ],
+    "view": {
+     "z": -1.44,
+     "x": 1119.6,
+     "y": 709.7
+    }
+   },
+   "view_changed": true,
+   "pixels_before": "84f0b364eb92",
+   "pixels_after": "be72ca10e9c4",
+   "pixels_changed": true,
+   "results": [
+    {
+     "id": "t4",
+     "test": "nhood_enrichment",
+     "a": {
+      "label": "AR-high",
+      "how": "program z>1",
+      "n": 628,
+      "n_used": 628
+     },
+     "b": {
+      "label": "NE-high",
+      "how": "program z>1",
+      "n": 890,
+      "n_used": 890
+     },
+     "gene": null,
+     "params": {
+      "radius_um": 130,
+      "n_perms": 999,
+      "seed": 0
+     },
+     "obs": 6,
+     "z": [
+      51.34612077465962,
+      -30.112618572815478,
+      -32.90480505395046,
+      -30.112618572815478,
+      79.51312962523214,
+      -60.18243238948262,
+      -32.90480505395046,
+      -60.18243238948262,
+      58.30434793726651
+     ],
+     "p": {
+      "enriched": 1,
+      "depleted": 0.001
+     }
+    }
+   ]
+  },
+  {
+   "q": "where is KLK3 high?",
+   "ms_to_done": 6172,
+   "model": "claude-sonnet-4-5-20250929",
+   "llm_ms": 3281,
+   "answer": "Showing KLK3 (PSA) expression across the tissue section. No statistical test is needed for visualizing gene expression.",
+   "interpretation": "User asks where KLK3 is high; displaying KLK3 gene expression levels.",
+   "view_call": {
+    "preset": "gene",
+    "color_by": {
+     "kind": "gene",
+     "gene": "KLK3"
+    }
+   },
+   "tests_called": [],
+   "before": {
+    "preset": "overview",
+    "enc": "cellSetSelection",
+    "gene": "SYP",
+    "sel": [
+     [
+      "Ask",
+      "AR-high (628)"
+     ],
+     [
+      "Ask",
+      "NE-high (890)"
+     ]
+    ],
+    "extra": [
+     "AR-high (628):628",
+     "NE-high (890):890"
+    ],
+    "view": {
+     "z": -1.44,
+     "x": 1119.6,
+     "y": 709.7
+    }
+   },
+   "after": {
+    "preset": "gene",
+    "enc": "geneSelection",
+    "gene": "KLK3",
+    "sel": [
+     [
+      "Ask",
+      "AR-high (628)"
+     ],
+     [
+      "Ask",
+      "NE-high (890)"
+     ]
+    ],
+    "extra": null,
+    "view": {
+     "z": -1.64,
+     "x": 1118.35,
+     "y": 703.8000000000001
+    }
+   },
+   "view_changed": true,
+   "pixels_before": "be72ca10e9c4",
+   "pixels_after": "5d307e4a5f6f",
+   "pixels_changed": true,
+   "results": []
+  }
+ ],
+ "share": {
+  "llm": true,
+  "model": "claude-sonnet-4-5-20250929",
+  "tests": [
+   "proximity: NE-high vs AR-high"
+  ],
+  "view": {
+   "preset": "overview",
+   "enc": "cellSetSelection",
+   "gene": "◆ NE score (z)",
+   "sel": [
+    [
+     "Ask",
+     "NE-high (890)"
+    ],
+    [
+     "Ask",
+     "AR-high (628)"
+    ]
+   ],
+   "extra": [
+    "NE-high (890):890",
+    "AR-high (628):628"
+   ],
+   "view": {
+    "z": -1.44,
+    "x": 1119.6,
+    "y": 709.7
+   }
+  },
+  "url": "http://localhost:8765/index.html?preset=overview&q=show+NE+cells+near+AR+tumor"
+ },
+ "errors": [
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+ ]
+}

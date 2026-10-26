@@ -6,6 +6,24 @@ This is an interactive spatial-transcriptomics portal for **GEO GSE230282 / GSM7
 
 ![Vitessce core: presets, confidence map and a live NL query](docs/media/vitessce_tour.gif)
 
+## v2 (branch `v2-live-llm`): live LLM + hypothesis tests computed on the data
+
+**Preview:** see the Vercel preview link in the PR / handoff note. The GitHub Pages site above is unchanged until this branch is merged.
+
+- **Live LLM.** Questions in the top bar (and `?q=` share links) go to `api/ask.js`, a Vercel serverless function that calls Anthropic's Messages API with one forced tool, `respond`. The model returns structured JSON: a short answer, how it mapped the question onto this data ("cells" are Visium spots, "core 3" is Leiden cluster 3), view changes (preset, colour by gene or score, highlight spot groups, zoom) and up to 3 tests with their groups and parameters. It never returns a statistic.
+- **Tests computed in your browser** (`v2/stats.js` in a Web Worker, over the served zarr matrix and spot table):
+  - `proximity`: mean nearest distance from group A to group B, label-permutation null (all spots, or only among A and B spots), one-sided p for closer and for farther.
+  - `nhood_enrichment`: squidpy-style A-B contact count on a 130 µm radius graph, label-permutation z and p.
+  - `co_occurrence`: squidpy co-occurrence ratio p(A | within d of B) / p(A) over distance, plus a permutation p at one distance.
+  - `wilcoxon`: rank-sum test of one gene between two groups (scipy defaults), with AUC and log2FC, and a note that spots are not independent replicates.
+  - Every card shows the statistic, the null, p, n, permutations and seed, the method and caveats. Permutations use a seeded generator, so a result is reproducible.
+- **Distance scale.** v2 calibrates micrometres from the array itself (median spot centre spacing = 100 µm Visium pitch: 14.51 hires px, 6.892 µm/px). v1 used 55 µm / `spot_diameter_fullres` (5.387 µm/px), which puts the spot pitch at 78 µm, so v1 distances (for example "median NE to AR 1.11 mm") read about 22% short. The precomputed v1 panels are left as they were.
+- **Key handling.** The Anthropic key lives only in the Vercel env var `ANTHROPIC_API_KEY` of the project. It is never in the client or the repo. Without it the app says so, falls back to the v1 rule parser, and the test buttons still run.
+- **Rate limit.** Per IP 8 requests/min and 120/day, plus 600/hour per instance, input capped at 600 characters and 900 output tokens. In memory per warm instance by default; set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` for a limit shared across instances. Optional: `ANTHROPIC_MODEL`, `RL_PER_MINUTE`, `RL_PER_DAY`, `RL_GLOBAL_PER_HOUR`, `ALLOWED_ORIGINS` (default `https://logan196.github.io`).
+- **Run locally:** `ANTHROPIC_API_KEY=... node scripts/dev-server.mjs 8765`, then open http://localhost:8765/.
+- **Verify:** `python verify/verify_tests.py . results_browser.json out` recomputes every browser result with squidpy 1.8.2 (`nhood_enrichment`, `co_occurrence`), scipy (`mannwhitneyu`, `cKDTree`) and an exact replica of the browser's seeded permutations. `node --test test/*.test.mjs` runs the engine unit tests.
+- **Limits.** One section from one patient, spot-level statistics, descriptive only. The label-shuffle null does not preserve tissue architecture.
+
 ## What's in it
 | Page | What it is |
 |---|---|
@@ -18,7 +36,7 @@ This is an interactive spatial-transcriptomics portal for **GEO GSE230282 / GSM7
 ![3D landscape (showcase.html)](docs/media/anim_landscape_grow.gif)
 
 ### Using the core viewer
-- **Ask**: e.g. `compare KLK3 in AR vs NE`, `NE spots within 300 µm of AR`, `where is chromogranin high` (aliases and fuzzy symbols work), or `genes correlated with SYP`. The parser runs in your browser and is rule-based: no LLM and no server. Each answer is computed from per-spot data and shown with the intent it parsed.
+- **Ask**: e.g. `compare KLK3 in AR vs NE`, `NE spots within 300 µm of AR`, `where is chromogranin high` (aliases and fuzzy symbols work), or `genes correlated with SYP`. In v1 the parser runs in your browser and is rule-based; in v2 the question goes to the live LLM and the rule parser is the fallback. Each answer is computed from per-spot data and shown with the intent it parsed.
 - **Share**: the URL always encodes the view (`?preset=conf`, `?q=compare%20KLK3%20in%20AR%20vs%20NE`, `?preset=gene&gene=SYP`). The 🔗 button copies it.
 - **Export**:
   - CSV of every spot: ensemble call, voter agreement, distance to AR, region, the current gene and the query group, with a provenance header.
